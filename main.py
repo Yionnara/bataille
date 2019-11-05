@@ -108,45 +108,47 @@ def runServerMode():
                 print(r)
                 line = r.decode("utf-8")
                 mots = line.split()
-                rep = r.decode("utf-8")
+                rep = r.decode("utf-8").replace('\n','')
                 if r == b'':
                     print("Disconnection of the address " + sk.getsockname()[0])
                     sk.close()
                     clients.remove(sk)
 
-                elif currentPlayer == J0 and not colDemandee and not ligneDemandee: # TOUR J0
-                    sJ0.send("quelle colonne ? \n".encode("utf-8"))
-                    colDemandee = True
                 elif currentPlayer == J0 and colDemandee and not ligneDemandee:
                     rep.capitalize()
                     x = ord(rep)-ord("A")+1
                     sJ0.send("quelle ligne ? \n".encode("utf-8"))
-                    colDemandee = True
+                    ligneDemandee = True
                 elif currentPlayer == J0 and colDemandee and ligneDemandee:
                     y = int(rep)
                     addShot(game, x, y, currentPlayer)
-                    print("======================")
-                    displayGame(game, 0)
+                    if gameOver(game) != -1:
+                        displayGameOver(sJ0, sJ1, game)
+                    sJ0.send("======================\n".encode("utf-8"))
+                    sJ1.send("======================\n".encode("utf-8"))
+                    sJ0.send(displayGame(game, 0).encode("utf-8"))
+                    sJ1.send(displayGame(game, 1).encode("utf-8"))
                     currentPlayer = (currentPlayer+1)%2
-                    colDemandee = False
                     ligneDemandee = False
+                    sJ1.send("quelle colonne ? ".encode("utf-8"))
 
-                elif currentPlayer == J1 and not colDemandee and not ligneDemandee: # TOUR J1
-                    sJ0.send("quelle colonne ? \n".encode("utf-8"))
-                    colDemandee = True
                 elif currentPlayer == J1 and colDemandee and not ligneDemandee:
                     rep.capitalize()
                     x = ord(rep)-ord("A")+1
                     sJ1.send("quelle ligne ? \n".encode("utf-8"))
-                    colDemandee = True
+                    ligneDemandee = True
                 elif currentPlayer == J1 and colDemandee and ligneDemandee:
                     y = int(rep)
                     addShot(game, x, y, currentPlayer)
-                    print("======================")
-                    displayGame(game, 0)
+                    if gameOver(game) != -1:
+                        displayGameOver(sJ0, sJ1, game)
+                    sJ0.send("======================\n".encode("utf-8"))
+                    sJ1.send("======================\n".encode("utf-8"))
+                    sJ0.send(displayGame(game, 0).encode("utf-8"))
+                    sJ1.send(displayGame(game, 1).encode("utf-8"))
                     currentPlayer = (currentPlayer+1)%2
-                    colDemandee = False
                     ligneDemandee = False
+                    sJ0.send("quelle colonne ? ".encode("utf-8"))
     """
     currentPlayer = 0
     while gameOver(game) == -1:
@@ -174,10 +176,27 @@ def runServerMode():
     else:
         print("you loose !")
     """
+def displayGameOver(sJ0, sJ1, game):
+    sJ0.send("game over\n".encode("utf-8"))
+    sJ0.send("your grid : \n".encode("utf-8"))
+    sJ0.send(displayGame(game, 0).encode("utf-8"))
+    sJ0.send("the other grid : \n".encode("utf-8"))
+    sJ0.send(displayGame(game, 1).encode("utf-8"))
+
+    sJ1.send("game over\n".encode("utf-8"))
+    sJ1.send("your grid : \n".encode("utf-8"))
+    sJ1.send(displayGame(game, 1).encode("utf-8"))
+    sJ1.send("the other grid : \n".encode("utf-8"))
+    sJ1.send(displayGame(game, 0).encode("utf-8"))
+    if gameOver(game) == J0:
+        sJ0.send("You win !\n".encode("utf-8"))
+        sJ1.send("you loose !\n".encode("utf-8"))
+    else:
+        sJ0.send("you loose !\n".encode("utf-8"))
+        sJ1.send("You win !\n".encode("utf-8"))
 
 def runClientMode(ServerAdress):
     os.system("nc " + ServerAdress + " 7777")
-
 
 if len(sys.argv) == 1:
     print("Lancement du mode Serveur")
