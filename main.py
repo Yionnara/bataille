@@ -17,7 +17,7 @@ def randomConfiguration():
             y = random.randint(1,10)
             isHorizontal = random.randint(0,1) == 0
             boats = boats + [Boat(x,y,LENGTHS_REQUIRED[i],isHorizontal)]
-    return boats
+    return (Boat(3,3,2,True), Boat(4,4,2,False))
 
 
 
@@ -114,16 +114,18 @@ def runServerMode():
                     sk.close()
                     clients.remove(sk)
 
-                elif currentPlayer == J0 and colDemandee and not ligneDemandee:
-                    rep.capitalize()
+                elif currentPlayer == J0 and colDemandee and not ligneDemandee and gameOver(game) == -1:
+                    rep = rep.capitalize()
                     x = ord(rep)-ord("A")+1
                     sJ0.send("quelle ligne ? \n".encode("utf-8"))
                     ligneDemandee = True
                 elif currentPlayer == J0 and colDemandee and ligneDemandee:
                     y = int(rep)
                     addShot(game, x, y, currentPlayer)
+                    print("gameOver = ", gameOver(game))
                     if gameOver(game) != -1:
                         displayGameOver(sJ0, sJ1, game)
+                        continue
                     sJ0.send("======================\n".encode("utf-8"))
                     sJ1.send("======================\n".encode("utf-8"))
                     sJ0.send(displayGame(game, 0).encode("utf-8"))
@@ -132,16 +134,18 @@ def runServerMode():
                     ligneDemandee = False
                     sJ1.send("quelle colonne ? ".encode("utf-8"))
 
-                elif currentPlayer == J1 and colDemandee and not ligneDemandee:
-                    rep.capitalize()
+                elif currentPlayer == J1 and colDemandee and not ligneDemandee and gameOver(game) == -1:
+                    rep = rep.capitalize()
                     x = ord(rep)-ord("A")+1
                     sJ1.send("quelle ligne ? \n".encode("utf-8"))
                     ligneDemandee = True
                 elif currentPlayer == J1 and colDemandee and ligneDemandee:
                     y = int(rep)
                     addShot(game, x, y, currentPlayer)
+                    print("gameOver = ", gameOver(game))
                     if gameOver(game) != -1:
                         displayGameOver(sJ0, sJ1, game)
+                        continue
                     sJ0.send("======================\n".encode("utf-8"))
                     sJ1.send("======================\n".encode("utf-8"))
                     sJ0.send(displayGame(game, 0).encode("utf-8"))
@@ -177,23 +181,26 @@ def runServerMode():
         print("you loose !")
     """
 def displayGameOver(sJ0, sJ1, game):
-    sJ0.send("game over\n".encode("utf-8"))
-    sJ0.send("your grid : \n".encode("utf-8"))
-    sJ0.send(displayGame(game, 0).encode("utf-8"))
-    sJ0.send("the other grid : \n".encode("utf-8"))
-    sJ0.send(displayGame(game, 1).encode("utf-8"))
+    print("Game over !")
 
-    sJ1.send("game over\n".encode("utf-8"))
+    sJ0.send("\n ||| GAME OVER |||\n".encode("utf-8"))
+    sJ0.send("your grid : \n".encode("utf-8"))
+    sJ0.send(displayConfiguration(game.boats[0], game.shots[1], showBoats=True).encode("utf-8"))
+    sJ0.send("the other grid : \n".encode("utf-8"))
+    sJ0.send(displayConfiguration(game.boats[1], game.shots[0], showBoats=True).encode("utf-8"))
+
+    sJ1.send("\n ||| GAME OVER |||\n".encode("utf-8"))
     sJ1.send("your grid : \n".encode("utf-8"))
-    sJ1.send(displayGame(game, 1).encode("utf-8"))
+    sJ1.send(displayConfiguration(game.boats[1], game.shots[0], showBoats=True).encode("utf-8"))
     sJ1.send("the other grid : \n".encode("utf-8"))
-    sJ1.send(displayGame(game, 0).encode("utf-8"))
+    sJ1.send(displayConfiguration(game.boats[0], game.shots[1], showBoats=True).encode("utf-8"))
+
     if gameOver(game) == J0:
-        sJ0.send("You win !\n".encode("utf-8"))
-        sJ1.send("you loose !\n".encode("utf-8"))
+        sJ0.send("You won !\n".encode("utf-8"))
+        sJ1.send("you lost !\n".encode("utf-8"))
     else:
-        sJ0.send("you loose !\n".encode("utf-8"))
-        sJ1.send("You win !\n".encode("utf-8"))
+        sJ0.send("you lost !\n".encode("utf-8"))
+        sJ1.send("You won !\n".encode("utf-8"))
 
 def runClientMode(ServerAdress):
     os.system("nc " + ServerAdress + " 7777")
