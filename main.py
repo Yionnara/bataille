@@ -17,7 +17,7 @@ def randomConfiguration():
             y = random.randint(1,10)
             isHorizontal = random.randint(0,1) == 0
             boats = boats + [Boat(x,y,LENGTHS_REQUIRED[i],isHorizontal)]
-    return (Boat(3,3,2,True), Boat(4,4,2,False))
+    return boats
 
 
 
@@ -92,17 +92,19 @@ def runServerMode():
                 clients.append(s2)
                 print("Connection of the address " + addr[0])
                 if len(clients) > 2:
+                    #Deux joueurs sont connectés : début de la partie
                     waitingPlayers = False
                     print("2 players connected : Let the game begins !")
                     sJ0 = clients[1]
                     sJ1 = s2
+                    #Envoyer num joueur à chaque joueur
+                    sJ1.send("1".encode("utf-8"))
+                    sJ0.send("0".encode("utf-8"))
+
                     sJ1.send(displayGame(game, 1).encode("utf-8"))
                     sJ0.send(displayGame(game, 0).encode("utf-8"))
 
                     currentPlayer = 0
-                    sJ0.send("quelle colonne ? ".encode("utf-8"))
-                    colDemandee = True
-                    ligneDemandee = False
             else:  #Commands reception
                 r = sk.recv(1500)
                 print(r)
@@ -114,6 +116,29 @@ def runServerMode():
                     sk.close()
                     clients.remove(sk)
 
+                if currentPlayer == J0 and sk == sJ0:
+                    x = ord(rep[0].capitalize())-ord("A")+1
+                    y = int(rep[1])
+                    addShot(game, x, y, currentPlayer)
+                    if gameOver(game) != -1:
+                        displayGameOver(sJ0, sJ1, game)
+                    sJ0.send(displayGame(game, 0).encode("utf-8"))
+                    currentPlayer = (currentPlayer+1)%2
+                    sJ1.send("1".encode("utf-8"))
+                elif currentPlayer == J1 and sk == sJ1:
+                    x = ord(rep[0].capitalize())-ord("A")+1
+                    y = int(rep[1])
+                    addShot(game, x, y, currentPlayer)
+                    if gameOver(game) != -1:
+                        displayGameOver(sJ0, sJ1, game)
+                    sJ1.send(displayGame(game, 1).encode("utf-8"))
+                    currentPlayer = (currentPlayer+1)%2
+                    sJ0.send("0".encode("utf-8"))
+                else:
+                    print("WRONG")
+
+
+                """
                 elif currentPlayer == J0 and colDemandee and not ligneDemandee and gameOver(game) == -1:
                     rep = rep.capitalize()
                     x = ord(rep)-ord("A")+1
@@ -153,33 +178,8 @@ def runServerMode():
                     currentPlayer = (currentPlayer+1)%2
                     ligneDemandee = False
                     sJ0.send("quelle colonne ? ".encode("utf-8"))
-    """
-    currentPlayer = 0
-    while gameOver(game) == -1:
-        if currentPlayer == J0:
-            x_char = input ("quelle colonne ? ")
-            x_char.capitalize()
-            x = ord(x_char)-ord("A")+1
-            y = int(input ("quelle ligne ? "))
-        else:
-            (x,y) = randomNewShot(game.shots[currentPlayer])
-            print("l'ordinateur joue ", chr(x+ord("A")-1), y)
-            time.sleep(1)
-        addShot(game, x, y, currentPlayer)
-        print("======================")
-        displayGame(game, 0)
-        currentPlayer = (currentPlayer+1)%2
-    print("game over")
-    print("your grid :")
-    displayGame(game, J0)
-    print("the other grid :")
-    displayGame(game, J1)
+                """
 
-    if gameOver(game) == J0:
-        print("You win !")
-    else:
-        print("you loose !")
-    """
 def displayGameOver(sJ0, sJ1, game):
     print("Game over !")
 
@@ -203,10 +203,60 @@ def displayGameOver(sJ0, sJ1, game):
         sJ1.send("You won !\n".encode("utf-8"))
 
 def runClientMode(ServerAdress):
-    os.system("nc " + ServerAdress + " 7777")
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect((sys.argv[1], 7777))
+    playerNum = int(client.recv(1024).decode("utf-8"))
+    print("PLAYER NUM : ", playerNum)
+    while True:
+        currentPlayer = int(client.recv(1024).decode("utf-8"))
+        gameString = client.recv(2048).decode("utf-8")
+        print("======================")
+        print(gameString)
+        if currentPlayer == playerNum:
+            col = input("quelle colonne ? ")
+            lig = input("quelle ligne ? ")
+            #Ici TEST valeurs entrées valides
+            client.send((col + lig).encode("utf-8"))
+        else:
+            print("L'autre joueur joue...")
+
+    #Recevoir numeroPlayer(0 ou 1)
+    #Recevoir la disposition de la game
+    #Si 0 --> demander ligne, colonne puis l'envoyer
+    #Si 1 --> afficher "Le joueur 0 joue..."
+
 
 if len(sys.argv) == 1:
     print("Lancement du mode Serveur")
     runServerMode()
 else:
     runClientMode(sys.argv[1])
+
+
+"""
+currentPlayer = 0
+while gameOver(game) == -1:
+    if currentPlayer == J0:
+        x_char = input ("quelle colonne ? ")
+        x_char.capitalize()
+        x = ord(x_char)-ord("A")+1
+        y = int(input ("quelle ligne ? "))
+    else:
+        (x,y) = randomNewShot(game.shots[currentPlayer])
+        print("l'ordinateur joue ", chr(x+ord("A")-1), y)
+        time.sleep(1)
+    addShot(game, x, y, currentPlayer)
+    print("======================")
+    displayGame(game, 0)
+    currentPlayer = (currentPlayer+1)%2
+print("game over")
+print("your grid :")
+displayGame(game, J0)
+print("the other grid :")
+displayGame(game, J1)
+
+if gameOver(game) == J0:
+    print("You win !")
+else:
+    print("you loose !")
+"""
