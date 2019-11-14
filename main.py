@@ -208,45 +208,38 @@ def displayGameOver(sJ0, sJ1, game):
     print("Game over !")
     #Envoi currentPlayer de fin de partie
     sJ0.send("-1".encode("utf-8"))
-    time.sleep(0.5)
-    #Envoi de sa grille
-    sJ0.send(displayConfiguration(game.boats[0], game.shots[1], showBoats=True).encode("utf-8"))
-    time.sleep(0.5)
-    #Envoi de la grille son adversaire
-    sJ0.send(displayConfiguration(game.boats[1], game.shots[0], showBoats=True).encode("utf-8"))
-    time.sleep(0.5)
-    #Envoi du gagnant
-    sJ0.send(gameOver(game).encode("utf-8"))
-
-    #Envoi currentPlayer de fin de partie
     sJ1.send("-1".encode("utf-8"))
     time.sleep(0.5)
     #Envoi de sa grille
+    sJ0.send(displayConfiguration(game.boats[0], game.shots[1], showBoats=True).encode("utf-8"))
     sJ1.send(displayConfiguration(game.boats[1], game.shots[0], showBoats=True).encode("utf-8"))
     time.sleep(0.5)
     #Envoi de la grille son adversaire
+    sJ0.send(displayConfiguration(game.boats[1], game.shots[0], showBoats=True).encode("utf-8"))
     sJ1.send(displayConfiguration(game.boats[0], game.shots[1], showBoats=True).encode("utf-8"))
     time.sleep(0.5)
     #Envoi du gagnant
-    sJ1.send(gameOver(game).encode("utf-8"))
+    print("gameOver : ", str(gameOver(game)))
+    sJ0.send(str(gameOver(game)).encode("utf-8"))
+    sJ1.send(str(gameOver(game)).encode("utf-8"))
 
 def runClientMode(ServerAdress):
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect((sys.argv[1], 7777))
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.connect((sys.argv[1], 7777))
 
     #Recevoir son numero de joueur(0 ou 1)
-    playerNum = client.recv(16).decode("utf-8")
+    playerNum = server.recv(16).decode("utf-8")
     playerNum = int(playerNum)
     print("PLAYER NUM : ", playerNum)
     while True:
         #Recevoir le joueur actuel
-        currentPlayer = client.recv(16).decode("utf-8")
+        currentPlayer = server.recv(16).decode("utf-8")
         print("currentPlayer : ", currentPlayer)
         currentPlayer = int(currentPlayer)
 
         #Recevoir la disposition de la partie si la partie n'est pas finie
         if currentPlayer != -1:
-            gameString = client.recv(2048).decode("utf-8")
+            gameString = server.recv(2048).decode("utf-8")
             print("======================")
             print(gameString)
 
@@ -261,27 +254,30 @@ def runClientMode(ServerAdress):
                 #TEST valeur lig valide
                 print("PAS BON CARACTERE")
                 lig = input("Quelle ligne ? ")
-            client.send((col + lig).encode("utf-8"))
+            server.send((col + lig).encode("utf-8"))
         elif currentPlayer == -1:
             #Fin de partie
             print("Game over !")
             time.sleep(0.7)
             print("Ta grille : ")
             #Réception de ma grille
-            myGrid = client.recv(2048).decode("utf-8")
+            myGrid = server.recv(2048).decode("utf-8")
             print(myGrid)
             time.sleep(1)
             #Réception de la grille du joueur adverse
-            opponentGrid = client.recv(2048).decode("utf-8")
+            opponentGrid = server.recv(2048).decode("utf-8")
             print("La grille de l'adversaire : ")
             print(opponentGrid)
 
             #Réception du gagnant
-            winner = int(client.recv(16).decode("utf-8"))
+            winner = server.recv(16).decode("utf-8")
+            winner = int(winner)
+            print("WINNER : ", winner)
             if winner == playerNum:
                 print("Wouhou tu as gagné")
             else:
                 print("C'est perdu")
+
         else:
             print("L'autre joueur joue...")
 
