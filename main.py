@@ -6,6 +6,7 @@ import time
 import sys, os
 import socket
 import select
+import time
 
 """ generate a random valid configuration """
 def randomConfiguration():
@@ -94,15 +95,25 @@ def runServerMode():
                 if len(clients) > 2:
                     #Deux joueurs sont connectés : début de la partie
                     waitingPlayers = False
+                    time.sleep(1)
                     print("2 players connected : Let the game begins !")
                     sJ0 = clients[1]
                     sJ1 = s2
-                    #Envoyer num joueur à chaque joueur
-                    sJ1.send("1".encode("utf-8"))
-                    sJ0.send("0".encode("utf-8"))
 
-                    sJ1.send(displayGame(game, 1).encode("utf-8"))
+                    time.sleep(1)
+                    #Envoyer num joueur à chaque joueur
+                    sJ0.send("0".encode("utf-8"))
+                    sJ1.send("1".encode("utf-8"))
+
+                    time.sleep(1)
+                    #Envoyer le currentPlayer à chaque joueur
+                    sJ0.send("0".encode("utf-8"))
+                    sJ1.send("0".encode("utf-8"))
+
+                    time.sleep(1)
+                    #Envoyer la disposition de la partie
                     sJ0.send(displayGame(game, 0).encode("utf-8"))
+                    sJ1.send(displayGame(game, 1).encode("utf-8"))
 
                     currentPlayer = 0
             else:  #Commands reception
@@ -122,18 +133,26 @@ def runServerMode():
                     addShot(game, x, y, currentPlayer)
                     if gameOver(game) != -1:
                         displayGameOver(sJ0, sJ1, game)
-                    sJ0.send(displayGame(game, 0).encode("utf-8"))
-                    currentPlayer = (currentPlayer+1)%2
+
+                    sJ0.send("1".encode("utf-8"))
                     sJ1.send("1".encode("utf-8"))
+                    time.sleep(1)
+                    sJ0.send(displayGame(game, 0).encode("utf-8"))
+                    sJ1.send(displayGame(game, 1).encode("utf-8"))
+                    currentPlayer = (currentPlayer+1)%2
                 elif currentPlayer == J1 and sk == sJ1:
                     x = ord(rep[0].capitalize())-ord("A")+1
                     y = int(rep[1])
                     addShot(game, x, y, currentPlayer)
                     if gameOver(game) != -1:
                         displayGameOver(sJ0, sJ1, game)
+
+                    sJ0.send("0".encode("utf-8"))
+                    sJ1.send("0".encode("utf-8"))
+                    time.sleep(1)
+                    sJ0.send(displayGame(game, 0).encode("utf-8"))
                     sJ1.send(displayGame(game, 1).encode("utf-8"))
                     currentPlayer = (currentPlayer+1)%2
-                    sJ0.send("0".encode("utf-8"))
                 else:
                     print("WRONG")
 
@@ -205,11 +224,15 @@ def displayGameOver(sJ0, sJ1, game):
 def runClientMode(ServerAdress):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((sys.argv[1], 7777))
-    playerNum = int(client.recv(1024).decode("utf-8"))
+    playerNum = client.recv(16).decode("utf-8")
+    playerNum = int(playerNum)
     print("PLAYER NUM : ", playerNum)
     while True:
-        currentPlayer = int(client.recv(1024).decode("utf-8"))
+        currentPlayer = client.recv(16).decode("utf-8")
+        print("currentPlayer : ", currentPlayer)
         gameString = client.recv(2048).decode("utf-8")
+        print("gameString : ", gameString)
+        currentPlayer = int(currentPlayer)
         print("======================")
         print(gameString)
         if currentPlayer == playerNum:
