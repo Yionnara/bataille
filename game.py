@@ -111,3 +111,36 @@ def isANewShot(x,y, shots):
         if (xx,yy) == (x,y):
             return False
     return True
+
+def displayConfiguration(boats, shots=[], showBoats=True):
+    Matrix = [[" " for x in range(WIDTH+1)] for y in range(WIDTH+1)]
+    for i  in range(1,WIDTH+1):
+        Matrix[i][0] = chr(ord("A")+i-1)
+        Matrix[0][i] = i
+
+    if showBoats:
+        for i in range(NB_BOATS):
+            b = boats[i]
+            (w,h) = boat2rec(b)
+            for dx in range(w):
+                for dy in range(h):
+                    Matrix[b.x+dx][b.y+dy] = str(i)
+
+    for (x,y,stike) in shots:
+        if stike:
+            Matrix[x][y] = "X"
+        else:
+            Matrix[x][y] = "O"
+
+    result = ""
+    for y in range(0, WIDTH+1):
+        if y == 0:
+            l = "  "
+        else:
+            l = str(y)
+            if y < 10:
+                l = l + " "
+        for x in range(1,WIDTH+1):
+            l = l + str(Matrix[x][y]) + " "
+        result += l + "\n"
+    return result

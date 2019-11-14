@@ -20,25 +20,22 @@ def randomConfiguration():
 
 def displayGameOver(sJ0, sJ1, game):
     print("Game over !")
-
-    sJ0.send("\n ||| GAME OVER |||\n".encode("utf-8"))
-    sJ0.send("your grid : \n".encode("utf-8"))
+    #Envoi currentPlayer de fin de partie
+    sJ0.send("-1".encode("utf-8"))
+    sJ1.send("-1".encode("utf-8"))
+    time.sleep(0.5)
+    #Envoi de sa grille
     sJ0.send(displayConfiguration(game.boats[0], game.shots[1], showBoats=True).encode("utf-8"))
-    sJ0.send("the other grid : \n".encode("utf-8"))
-    sJ0.send(displayConfiguration(game.boats[1], game.shots[0], showBoats=True).encode("utf-8"))
-
-    sJ1.send("\n ||| GAME OVER |||\n".encode("utf-8"))
-    sJ1.send("your grid : \n".encode("utf-8"))
     sJ1.send(displayConfiguration(game.boats[1], game.shots[0], showBoats=True).encode("utf-8"))
-    sJ1.send("the other grid : \n".encode("utf-8"))
+    time.sleep(0.5)
+    #Envoi de la grille son adversaire
+    sJ0.send(displayConfiguration(game.boats[1], game.shots[0], showBoats=True).encode("utf-8"))
     sJ1.send(displayConfiguration(game.boats[0], game.shots[1], showBoats=True).encode("utf-8"))
-
-    if gameOver(game) == J0:
-        sJ0.send("You won !\n".encode("utf-8"))
-        sJ1.send("you lost !\n".encode("utf-8"))
-    else:
-        sJ0.send("you lost !\n".encode("utf-8"))
-        sJ1.send("You won !\n".encode("utf-8"))
+    time.sleep(0.5)
+    #Envoi du gagnant
+    print("gameOver : ", str(gameOver(game)))
+    sJ0.send(str(gameOver(game)).encode("utf-8"))
+    sJ1.send(str(gameOver(game)).encode("utf-8"))
 
 
 
@@ -122,7 +119,5 @@ def main():
                     
                 sJ0.send(pickle.dumps((game.boats[0], game.shots[0], game.shots[1])))
                 sJ1.send(pickle.dumps((game.boats[1], game.shots[1], game.shots[0])))
-                # sJ0.send(displayGame(game, 0).encode("utf-8"))
-                # sJ1.send(displayGame(game, 1).encode("utf-8"))
                 currentPlayer = (currentPlayer+1)%2
 main()
