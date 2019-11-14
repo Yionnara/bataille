@@ -7,6 +7,7 @@ import sys, os
 import socket
 import select
 import time
+import re
 
 """ generate a random valid configuration """
 def randomConfiguration():
@@ -224,62 +225,41 @@ def displayGameOver(sJ0, sJ1, game):
 def runClientMode(ServerAdress):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((sys.argv[1], 7777))
+
+    #Recevoir son numero de joueur(0 ou 1)
     playerNum = client.recv(16).decode("utf-8")
     playerNum = int(playerNum)
     print("PLAYER NUM : ", playerNum)
     while True:
+        #Recevoir le joueur actuel
         currentPlayer = client.recv(16).decode("utf-8")
         print("currentPlayer : ", currentPlayer)
+        #Recevoir la disposition de la partie
         gameString = client.recv(2048).decode("utf-8")
-        print("gameString : ", gameString)
         currentPlayer = int(currentPlayer)
         print("======================")
         print(gameString)
+
         if currentPlayer == playerNum:
             col = input("quelle colonne ? ")
+            while len(col) != 1 or not re.compile("[a-jA-J]").match(col):
+                #TEST valeur col valide
+                print("PAS BON CARACTERE")
+                col = input("quelle colonne ? ")
             lig = input("quelle ligne ? ")
-            #Ici TEST valeurs entrées valides
+            while len(lig) == 0 or len(lig) > 2 or not re.compile("(10|[1-9])").match(lig):
+                #TEST valeur lig valide
+                print("PAS BON CARACTERE")
+                lig = input("quelle ligne ? ")
             client.send((col + lig).encode("utf-8"))
         else:
             print("L'autre joueur joue...")
 
-    #Recevoir numeroPlayer(0 ou 1)
-    #Recevoir la disposition de la game
-    #Si 0 --> demander ligne, colonne puis l'envoyer
-    #Si 1 --> afficher "Le joueur 0 joue..."
 
 
 if len(sys.argv) == 1:
     print("Lancement du mode Serveur")
     runServerMode()
 else:
+    print("Lancement du mode Client...")
     runClientMode(sys.argv[1])
-
-
-"""
-currentPlayer = 0
-while gameOver(game) == -1:
-    if currentPlayer == J0:
-        x_char = input ("quelle colonne ? ")
-        x_char.capitalize()
-        x = ord(x_char)-ord("A")+1
-        y = int(input ("quelle ligne ? "))
-    else:
-        (x,y) = randomNewShot(game.shots[currentPlayer])
-        print("l'ordinateur joue ", chr(x+ord("A")-1), y)
-        time.sleep(1)
-    addShot(game, x, y, currentPlayer)
-    print("======================")
-    displayGame(game, 0)
-    currentPlayer = (currentPlayer+1)%2
-print("game over")
-print("your grid :")
-displayGame(game, J0)
-print("the other grid :")
-displayGame(game, J1)
-
-if gameOver(game) == J0:
-    print("You win !")
-else:
-    print("you loose !")
-"""
