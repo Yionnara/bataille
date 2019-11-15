@@ -13,7 +13,7 @@ def main():
     try:
         serverAddress=sys.argv[1]
     except Exception as e:
-        serverAddress=input("Enter Server Address : ")
+        serverAddress=input("Adresse du serveur : ")
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.connect((serverAddress, 7777))
@@ -22,7 +22,8 @@ def main():
     playerNum = server.recv(16).decode("utf-8")
     playerNum = int(playerNum)
     print("PLAYER NUM : ", playerNum)
-    while True:
+    endConnection = False
+    while not endConnection:
         #Recevoir le joueur actuel
         currentPlayer = server.recv(16).decode("utf-8")
         print("currentPlayer : ", currentPlayer)
@@ -39,12 +40,12 @@ def main():
             col = input("Quelle colonne ? ")
             while len(col) != 1 or not re.compile("[a-jA-J]").match(col):
                 #TEST valeur col valide
-                print("PAS BON CARACTERE")
+                print("Caracteres valides : [a-jA-J]")
                 col = input("Quelle colonne ? ")
             lig = input("Quelle ligne ? ")
             while len(lig) == 0 or len(lig) > 2 or not re.compile("(10|[1-9])").match(lig):
                 #TEST valeur lig valide
-                print("PAS BON CARACTERE")
+                print("Caracteres valides : [1-10]")
                 lig = input("Quelle ligne ? ")
             server.send((col + lig).encode("utf-8"))
         elif currentPlayer == -1:
@@ -63,13 +64,15 @@ def main():
 
             #Réception du gagnant
             winner = server.recv(16).decode("utf-8")
-            winner = int(winner)
+            winner = (int(winner)+1)%2
+            #La valeur de winner est l'inverse de celle envoyer par le serveur (quand 1 gagne, le serveur envoie 1 et le client recoit 0)
+            #sûrement une histoire de bit
             print("WINNER : ", winner)
             if winner == playerNum:
                 print("Wouhou tu as gagné")
             else:
                 print("C'est perdu")
-
+            endConnection = True
         else:
             print("L'autre joueur joue...")
 

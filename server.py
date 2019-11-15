@@ -16,7 +16,7 @@ def randomConfiguration():
             y = random.randint(1,10)
             isHorizontal = random.randint(0,1) == 0
             boats = boats + [Boat(x,y,LENGTHS_REQUIRED[i],isHorizontal)]
-    return boats
+    return (Boat(2,2,1,True),Boat(3,3,1,True)) # return boats
 
 def displayGameOver(sJ0, sJ1, game):
     print("Game over !")
@@ -33,10 +33,11 @@ def displayGameOver(sJ0, sJ1, game):
     sJ1.send(displayConfiguration(game.boats[0], game.shots[1], showBoats=True).encode("utf-8"))
     time.sleep(0.5)
     #Envoi du gagnant
-    print("gameOver : ", str(gameOver(game)))
-    sJ0.send(str(gameOver(game)).encode("utf-8"))
-    sJ1.send(str(gameOver(game)).encode("utf-8"))
-
+    winner = str(gameOver(game)).replace(' ', '')
+    print("gameOver : ", winner)
+    sJ0.send(winner.encode("utf-8"))
+    sJ1.send(winner.encode("utf-8"))
+    time.sleep(0.5)
 
 
 def main():
@@ -97,11 +98,11 @@ def main():
                     print("Disconnection of the address " + sk.getsockname()[0])
                     sk.close()
                     clients.remove(sk)
-                    
+
                 x = ord(rep[0].capitalize())-ord("A")+1
                 y = int(rep[1])
                 addShot(game, x, y, currentPlayer)
-                
+
                 if gameOver(game) != -1:
                     displayGameOver(sJ0, sJ1, game)
 
@@ -114,9 +115,9 @@ def main():
                 else:
                     print("WRONG")
                     sys.exit(1)
-                
+
                 time.sleep(1)
-                    
+
                 sJ0.send(pickle.dumps((game.boats[0], game.shots[0], game.shots[1])))
                 sJ1.send(pickle.dumps((game.boats[1], game.shots[1], game.shots[0])))
                 currentPlayer = (currentPlayer+1)%2
