@@ -31,7 +31,7 @@ def main():
 
         #Recevoir la disposition de la partie si la partie n'est pas finie
         if currentPlayer != -1:
-            (boats, shotsPlayer, shotsOther) = pickle.loads(server.recv(2048))
+            (boats, shotsPlayer, shotsOther) = pickle.loads(server.recv(1080))
             gameString = displayGame(boats, shotsPlayer, shotsOther)
             print("======================")
             print(gameString)
@@ -66,6 +66,7 @@ def main():
             winner = (int(winner)+1)%2
             #La valeur de winner est l'inverse de celle envoyer par le serveur (quand 1 gagne, le serveur envoie 1 et le client recoit 0)
             #sûrement une histoire de bit
+            print("WINNER : ", winner)
             if winner == playerNum:
                 print("Wouhou tu as gagné")
             else:

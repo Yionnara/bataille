@@ -14,7 +14,7 @@ def randomConfiguration():
     boats = [];
     while not isValidConfiguration(boats):
         boats=[]
-        for i in range(5):
+        for i in range(10):
             x = random.randint(1,10)
             y = random.randint(1,10)
             isHorizontal = random.randint(0,1) == 0

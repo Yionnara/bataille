@@ -10,6 +10,7 @@ import time
 s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
 clients = None
 
+""" generate a random valid configuration """
 def randomConfiguration():
     boats = [];
     while not isValidConfiguration(boats):
@@ -19,7 +20,7 @@ def randomConfiguration():
             y = random.randint(1,10)
             isHorizontal = random.randint(0,1) == 0
             boats = boats + [Boat(x,y,LENGTHS_REQUIRED[i],isHorizontal)]
-    return (Boat(2,2,1,True),Boat(3,3,1,True)) # return boats
+    return boats
 
 def displayGameOver(sJ0, sJ1, game):
     print("Game over !")
@@ -83,6 +84,7 @@ def main():
                     sJ0.send("0".encode("utf-8"))
                     sJ1.send("0".encode("utf-8"))
                     #Envoyer les tableaux de dispositions
+
                     sJ0.send(pickle.dumps((game.boats[0], game.shots[0], game.shots[1])))
                     sJ1.send(pickle.dumps((game.boats[1], game.shots[1], game.shots[0])))
 
