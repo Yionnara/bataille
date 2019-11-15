@@ -61,13 +61,11 @@ def main():
             opponentGrid = server.recv(2048).decode("utf-8")
             print("La grille de l'adversaire : ")
             print(opponentGrid)
-
             #Réception du gagnant
             winner = server.recv(16).decode("utf-8")
             winner = (int(winner)+1)%2
             #La valeur de winner est l'inverse de celle envoyer par le serveur (quand 1 gagne, le serveur envoie 1 et le client recoit 0)
             #sûrement une histoire de bit
-            print("WINNER : ", winner)
             if winner == playerNum:
                 print("Wouhou tu as gagné")
             else:

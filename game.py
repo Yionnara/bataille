@@ -28,6 +28,7 @@ class Game:
       # where strike is True if there is an opponent boat at (x,y)
     def __init__(self, boats1, boats2):
         self.boats = [boats1, boats2]
+        self.shots = [[],[]]
 
 """ Play a shot by the player. Return True if this shot strike a a boat, False if not and None
    if this shot has already been played by the player."""
