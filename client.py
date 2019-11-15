@@ -19,9 +19,9 @@ def main():
     server.connect((serverAddress, 7777))
 
     #Recevoir son numero de joueur(0 ou 1)
-    playerNum = server.recv(16).decode("utf-8")
-    playerNum = int(playerNum)
-    print("PLAYER NUM : ", playerNum)
+    playerNum = server.recv(16)
+    playerNum = int(playerNum.decode("utf-8"))
+    print("PLAYER NUM :", playerNum)
     endConnection = False
     while not endConnection:
         #Recevoir le joueur actuel
@@ -31,7 +31,7 @@ def main():
 
         #Recevoir la disposition de la partie si la partie n'est pas finie
         if currentPlayer != -1:
-            (boats, shotsPlayer, shotsOther) = pickle.loads(server.recv(1080))
+            (boats, shotsPlayer, shotsOther) = pickle.loads(server.recv(2048))
             gameString = displayGame(boats, shotsPlayer, shotsOther)
             print("======================")
             print(gameString)
@@ -53,20 +53,19 @@ def main():
             print("Game over !")
             time.sleep(0.7)
             print("Ta grille : ")
-            #Réception de ma grille
-            myGrid = server.recv(2048).decode("utf-8")
+            #Réception des grilles des 2 joueurs
+            (myBoats, opponentBoats, shotsPlayer, shotsOther) = pickle.loads(server.recv(2048))
+
+            myGrid = displayConfiguration(boats, shotsOther, showBoats=True)
             print(myGrid)
             time.sleep(1)
-            #Réception de la grille du joueur adverse
-            opponentGrid = server.recv(2048).decode("utf-8")
+            opponentGrid = displayConfiguration(opponentBoats, shotsPlayer, showBoats=True)
             print("La grille de l'adversaire : ")
             print(opponentGrid)
             #Réception du gagnant
             winner = server.recv(16).decode("utf-8")
-            winner = (int(winner)+1)%2
-            #La valeur de winner est l'inverse de celle envoyer par le serveur (quand 1 gagne, le serveur envoie 1 et le client recoit 0)
-            #sûrement une histoire de bit
-            print("WINNER : ", winner)
+            winner = (int(winner))
+
             if winner == playerNum:
                 print("Wouhou tu as gagné")
             else:

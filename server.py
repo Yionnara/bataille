@@ -10,7 +10,6 @@ import time
 s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
 clients = None
 
-""" generate a random valid configuration """
 def randomConfiguration():
     boats = [];
     while not isValidConfiguration(boats):
@@ -28,13 +27,9 @@ def displayGameOver(sJ0, sJ1, game):
     sJ0.send("-1".encode("utf-8"))
     sJ1.send("-1".encode("utf-8"))
     time.sleep(0.5)
-    #Envoi de sa grille
-    sJ0.send(displayConfiguration(game.boats[0], game.shots[1], showBoats=True).encode("utf-8"))
-    sJ1.send(displayConfiguration(game.boats[1], game.shots[0], showBoats=True).encode("utf-8"))
-    time.sleep(0.5)
-    #Envoi de la grille son adversaire
-    sJ0.send(displayConfiguration(game.boats[1], game.shots[0], showBoats=True).encode("utf-8"))
-    sJ1.send(displayConfiguration(game.boats[0], game.shots[1], showBoats=True).encode("utf-8"))
+    #Envoi des grilles des 2 joueurs
+    sJ0.send(pickle.dumps((game.boats[0], game.boats[1], game.shots[0], game.shots[1])))
+    sJ1.send(pickle.dumps((game.boats[1], game.boats[0], game.shots[0], game.shots[1])))
     time.sleep(0.5)
     #Envoi du gagnant
     winner = str(gameOver(game)).replace(' ', '')
@@ -74,17 +69,18 @@ def main():
                     #Deux joueurs sont connectés : début de la partie
                     waitingPlayers = False
                     time.sleep(1)
-                    print("2 players connected : Let the game begins !")
+                    print("2 joueurs connectés : \"Let the game begins !\"")
                     sJ0 = clients[1]
                     sJ1 = s2
                     #Envoyer num joueur à chaque joueur
                     sJ0.send("0".encode("utf-8"))
                     sJ1.send("1".encode("utf-8"))
+                    time.sleep(0.5)
                     #Envoyer le currentPlayer à chaque joueur
                     sJ0.send("0".encode("utf-8"))
                     sJ1.send("0".encode("utf-8"))
+                    time.sleep(0.5)
                     #Envoyer les tableaux de dispositions
-
                     sJ0.send(pickle.dumps((game.boats[0], game.shots[0], game.shots[1])))
                     sJ1.send(pickle.dumps((game.boats[1], game.shots[1], game.shots[0])))
 
@@ -108,7 +104,7 @@ def main():
                     displayGameOver(sJ0, sJ1, game)
                     inGame=False
                     time.sleep(1)
-                    
+
 
                 if currentPlayer == J0 and sk == sJ0:
                     sJ0.send("1".encode("utf-8"))
@@ -127,7 +123,7 @@ def main():
                     sJ1.send(pickle.dumps((game.boats[1], game.shots[1], game.shots[0])))
                     currentPlayer = (currentPlayer+1)%2
 
-print("Lancement du Server...")
+print("Lancement du Serveur...")
 while True:
     print("---------NOUVELLE PARTIE-------")
     main()
