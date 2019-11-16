@@ -16,12 +16,18 @@ def main():
         serverAddress=input("Adresse du serveur : ")
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.connect((serverAddress, 7777))
+    try :
+        server.connect((serverAddress, 7777))
+        print("Connecté ! En attente du deuxième joueur...")
+    except :
+        print("ERROR : Server unknown")
+        sys.exit(1)
 
     #Recevoir son numero de joueur(0 ou 1)
     playerNum = server.recv(16)
     playerNum = int(playerNum.decode("utf-8"))
-    print("PLAYER NUM :", playerNum)
+    print("---LET THE GAME BEGIN---")
+    
     endConnection = False
     while not endConnection:
         #Recevoir le joueur actuel
@@ -31,7 +37,7 @@ def main():
 
         #Recevoir la disposition de la partie si la partie n'est pas finie
         if currentPlayer != -1:
-            (boats, shotsPlayer, shotsOther) = pickle.loads(server.recv(2048))
+            (boats, shotsPlayer, shotsOther) = pickle.loads(server.recv(1024))
             gameString = displayGame(boats, shotsPlayer, shotsOther)
             print("======================")
             print(gameString)
@@ -51,14 +57,14 @@ def main():
         elif currentPlayer == -1:
             #Fin de partie
             print("Game over !")
-            time.sleep(0.7)
+            time.sleep(0.1)
             print("Ta grille : ")
             #Réception des grilles des 2 joueurs
-            (myBoats, opponentBoats, shotsPlayer, shotsOther) = pickle.loads(server.recv(2048))
+            (myBoats, opponentBoats, shotsPlayer, shotsOther) = pickle.loads(server.recv(1024))
 
             myGrid = displayConfiguration(boats, shotsOther, showBoats=True)
             print(myGrid)
-            time.sleep(1)
+            time.sleep(0.1)
             opponentGrid = displayConfiguration(opponentBoats, shotsPlayer, showBoats=True)
             print("La grille de l'adversaire : ")
             print(opponentGrid)

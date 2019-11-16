@@ -26,17 +26,17 @@ def displayGameOver(sJ0, sJ1, game):
     #Envoi currentPlayer de fin de partie
     sJ0.send("-1".encode("utf-8"))
     sJ1.send("-1".encode("utf-8"))
-    time.sleep(0.5)
+    time.sleep(0.1)
     #Envoi des grilles des 2 joueurs
     sJ0.send(pickle.dumps((game.boats[0], game.boats[1], game.shots[0], game.shots[1])))
     sJ1.send(pickle.dumps((game.boats[1], game.boats[0], game.shots[0], game.shots[1])))
-    time.sleep(0.5)
+    time.sleep(0.1)
     #Envoi du gagnant
     winner = str(gameOver(game)).replace(' ', '')
     print("gameOver : ", winner)
     sJ0.send(winner.encode("utf-8"))
     sJ1.send(winner.encode("utf-8"))
-    time.sleep(0.5)
+    time.sleep(0.1)
     s.close()
 
 
@@ -68,30 +68,29 @@ def main():
                 if len(clients) > 2:
                     #Deux joueurs sont connectés : début de la partie
                     waitingPlayers = False
-                    time.sleep(1)
+                    time.sleep(0.1)
                     print("2 joueurs connectés : \"Let the game begins !\"")
                     sJ0 = clients[1]
-                    sJ1 = s2
-                    #Envoyer num joueur à chaque joueur
+                    sJ1 = clients[2]
+                    #Envoyer num joueur au deuxième chaque joueur
                     sJ0.send("0".encode("utf-8"))
                     sJ1.send("1".encode("utf-8"))
-                    time.sleep(0.5)
+                    time.sleep(0.1)
                     #Envoyer le currentPlayer à chaque joueur
                     sJ0.send("0".encode("utf-8"))
                     sJ1.send("0".encode("utf-8"))
-                    time.sleep(0.5)
+                    time.sleep(0.1)
                     #Envoyer les tableaux de dispositions
                     sJ0.send(pickle.dumps((game.boats[0], game.shots[0], game.shots[1])))
                     sJ1.send(pickle.dumps((game.boats[1], game.shots[1], game.shots[0])))
 
                     currentPlayer = 0
             else:  #Commands reception
-                r = sk.recv(1500)
-                print(r)
-                line = r.decode("utf-8")
+                line = sk.recv(512).decode("utf-8")
+                print("J" + str(currentPlayer+1) + " : " + line)
                 mots = line.split()
-                rep = r.decode("utf-8").replace('\n','')
-                if r == b'':
+                rep = line.replace('\n','')
+                if line.encode("utf-8") == b'':
                     print("Disconnection of the address " + sk.getsockname()[0])
                     sk.close()
                     clients.remove(sk)
@@ -99,11 +98,10 @@ def main():
                 x = ord(rep[0].capitalize())-ord("A")+1
                 y = int(rep[1])
                 addShot(game, x, y, currentPlayer)
-
                 if gameOver(game) != -1:
                     displayGameOver(sJ0, sJ1, game)
                     inGame=False
-                    time.sleep(1)
+                    time.sleep(0.1)
 
 
                 if currentPlayer == J0 and sk == sJ0:
@@ -116,7 +114,7 @@ def main():
                     print("WRONG")
                     sys.exit(1)
 
-                time.sleep(1)
+                time.sleep(0.1)
 
                 if inGame:
                     sJ0.send(pickle.dumps((game.boats[0], game.shots[0], game.shots[1])))

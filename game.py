@@ -7,6 +7,7 @@ WIDTH = 10 # width of the grid
 NB_BOATS = 5 # nb boats in the game
 LENGTHS_REQUIRED =[2,3,3,4,5] # list of size of different boats
 LENGTH_CARDINALITIES_REQUIRED = [0,0,1,2,1,1] # number of boats of different sizes
+
 TOTAL_LENGTH = 17 #sum of boat sizes
 
 J0 = 0 #Player 0
