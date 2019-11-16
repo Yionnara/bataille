@@ -43,17 +43,12 @@ def main():
             print(gameString)
 
         if currentPlayer == playerNum:
-            col = input("Quelle colonne ? ")
-            while len(col) != 1 or not re.compile("[a-jA-J]").match(col):
+            msg = input("Quelle ColonneLigne ? ")
+            while not re.compile("[a-jA-J]{1}(10|[1-9]){1}$").match(msg):
                 #TEST valeur col valide
-                print("Caracteres valides : [a-jA-J]")
-                col = input("Quelle colonne ? ")
-            lig = input("Quelle ligne ? ")
-            while len(lig) == 0 or len(lig) > 2 or not re.compile("(10|[1-9])").match(lig):
-                #TEST valeur lig valide
-                print("Caracteres valides : [1-10]")
-                lig = input("Quelle ligne ? ")
-            server.send((col + lig).encode("utf-8"))
+                print("[Colonne][Ligne] ex : b" + str(random.randint(1,10)))
+                msg = input("Quelle ColonneLigne ? ")
+            server.send(msg.encode("utf-8"))
         elif currentPlayer == -1:
             #Fin de partie
             print("Game over !")
