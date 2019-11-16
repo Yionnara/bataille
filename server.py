@@ -21,7 +21,7 @@ def randomConfiguration():
             boats = boats + [Boat(x,y,LENGTHS_REQUIRED[i],isHorizontal)]
     return boats
 
-def displayGameOver(sJ0, sJ1, game):
+def sendGameOver(sJ0, sJ1, game):
     print("Game over !")
     #Envoi currentPlayer de fin de partie
     sJ0.send("-1".encode("utf-8"))
@@ -99,7 +99,7 @@ def main():
                 y = int(rep[1])
                 addShot(game, x, y, currentPlayer)
                 if gameOver(game) != -1:
-                    displayGameOver(sJ0, sJ1, game)
+                    sendGameOver(sJ0, sJ1, game)
                     inGame=False
                     time.sleep(0.1)
 
