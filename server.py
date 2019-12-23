@@ -101,19 +101,27 @@ def main():
 
                     x = ord(rep[0].capitalize())-ord("A")+1
                     y = int(rep[1])
-                    addShot(game, x, y, currentPlayer)
+                    
+                    touched = addShot(game, x, y, currentPlayer)
+
                     if gameOver(game) != -1:
                         sendGameOver(sJ0, sJ1, game)
                         inGame=False
                         time.sleep(0.1)
 
-
-                    if currentPlayer == J0 and sk == sJ0:
+                    
+                    if currentPlayer == J0 and sk == sJ0 and not touched:
                         sJ0.send("1".encode("utf-8"))
                         sJ1.send("1".encode("utf-8"))
-                    elif currentPlayer == J1 and sk == sJ1:
+                    elif currentPlayer == J1 and sk == sJ1 and not touched:
                         sJ0.send("0".encode("utf-8"))
                         sJ1.send("0".encode("utf-8"))
+                    elif currentPlayer == J0 and sk == sJ0 and touched:
+                        sJ0.send("0".encode("utf-8"))
+                        sJ1.send("0".encode("utf-8"))
+                    elif currentPlayer == J1 and sk == sJ1 and touched:
+                        sJ0.send("1".encode("utf-8"))
+                        sJ1.send("1".encode("utf-8"))
                     else:
                         print("WRONG")
                         sys.exit(1)
