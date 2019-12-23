@@ -139,7 +139,7 @@ def main():
                     if inGame:
                         sJ0.send(pickle.dumps((game.boats[0], game.shots[0], game.shots[1])))
                         sJ1.send(pickle.dumps((game.boats[1], game.shots[1], game.shots[0])))
-                        currentPlayer = (currentPlayer+1)%2
+                        if not touched : currentPlayer = (currentPlayer+1)%2
     except KeyboardInterrupt:
         print("\nEnding Server...")
         sys.exit(0)
