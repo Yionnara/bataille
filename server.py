@@ -96,6 +96,8 @@ def main():
                         break
 
                     print("J" + str(currentPlayer+1) + " : " + line)
+                    strLine = line
+
                     mots = line.split()
                     rep = line.replace('\n','')
 
@@ -103,6 +105,12 @@ def main():
                     y = int(rep[1])
                     
                     touched = addShot(game, x, y, currentPlayer)
+                    if touched:
+                        sJ0.send(("Joueur " + str(currentPlayer) + " : " + " Touché").encode("utf-8"))
+                        sJ1.send(("Joueur " + str(currentPlayer) + " : " + " Touché").encode("utf-8"))
+                    else:
+                        sJ0.send(("Joueur " + str(currentPlayer) + " : " + " Loupé").encode("utf-8"))
+                        sJ1.send(("Joueur " + str(currentPlayer) + " : " + " Loupé").encode("utf-8"))
 
                     if gameOver(game) != -1:
                         sendGameOver(sJ0, sJ1, game)
@@ -123,7 +131,7 @@ def main():
                         sJ0.send("1".encode("utf-8"))
                         sJ1.send("1".encode("utf-8"))
                     else:
-                        print("WRONG")
+                        print("WRONG " + str(currentPlayer) + " Touché : " + str(touched))
                         sys.exit(1)
 
                     time.sleep(0.1)

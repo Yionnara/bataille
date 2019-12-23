@@ -75,6 +75,7 @@ def main():
                 endConnection = True
             else:
                 print("L'autre joueur joue...")
+            print (server.recv(1024).decode("utf-8"))
     except KeyboardInterrupt:
         print("\nEndig game...")
         sys.exit(1)
