@@ -143,6 +143,8 @@ def main():
     except KeyboardInterrupt:
         print("\nEnding Server...")
         sys.exit(0)
+    except UnboundLocalError :
+        print("\nClient déconnecté")
 
 print("Lancement du Serveur...")
 while True:

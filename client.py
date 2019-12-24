@@ -77,7 +77,7 @@ def main():
                 print("L'autre joueur joue...")
             print (server.recv(1024).decode("utf-8"))
     except KeyboardInterrupt:
-        print("\nEndig game...")
+        print("\nEnding game...")
         sys.exit(1)
     except ValueError:
         print("The other player disconnect, YOU WON")
